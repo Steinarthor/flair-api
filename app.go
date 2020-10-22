@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
@@ -87,18 +88,18 @@ func (a *App) AddUser(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	token := r.Header.Get("Authorization")
 
 	var getUserRequest User
 
-	dec := json.NewDecoder(r.Body)
 	enc := json.NewEncoder(w)
-	err := dec.Decode(&getUserRequest)
+	err, username := ExtractUserName(token)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 	}
 
-	err, user := getUserRequest.Get(getUserRequest.Username, a.Db)
+	err, user := getUserRequest.Get(fmt.Sprint(username) , a.Db)
 
 	if err != nil {
 		enc.Encode(Response{

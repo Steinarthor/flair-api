@@ -8,6 +8,7 @@ import (
 
 // User model
 type User struct {
+	Id       int64 `json:"id"`
 	Name     string `json:"name"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
@@ -31,12 +32,12 @@ func (u *User) Add(name, username, email string, db *sql.DB) error {
 func (u *User) Get(username string, db *sql.DB) (error, User) {
 	var user User
 
-	getUser, err := db.Prepare("SELECT name, username, email FROM user WHERE username = ?")
+	getUser, err := db.Prepare("SELECT id, name, username, email FROM user WHERE username = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = getUser.QueryRow(username).Scan(&user.Name, &user.Username, &user.Email)
+	err = getUser.QueryRow(username).Scan(&user.Id, &user.Name, &user.Username, &user.Email)
 
 	if err != nil {
 		return errors.New("no user found"), User{}
