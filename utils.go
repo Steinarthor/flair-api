@@ -2,12 +2,13 @@ package main
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
 	"os"
 	"strings"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
-func ExtractUserName(token string) (error, interface{}) {
+func ExtractEmail(token string) (error, interface{}) {
 	claims := jwt.MapClaims{}
 	extractedToken := strings.Split(token, "Bearer ")
 	if len(extractedToken) == 2 {
@@ -23,5 +24,5 @@ func ExtractUserName(token string) (error, interface{}) {
 		return errors.New(err.Error()), ""
 	}
 
-	return nil, claims["Username"]
+	return nil, claims["Email"]
 }

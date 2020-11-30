@@ -8,19 +8,18 @@ import (
 
 // User model
 type User struct {
-	Id       int64 `json:"id"`
+	ID      int64 `json:"id"`
 	Name     string `json:"name"`
-	Username string `json:"username"`
 	Email    string `json:"email"`
 }
 
-// Signup accepts username, password and an email and registers an creates a new account.
-func (u *User) Add(name, username, email string, db *sql.DB) error {
-	addUser, err := db.Prepare("INSERT INTO user(name, username, email) VALUES(?,?,?)")
+// Signup accepts, password and an email and registers an creates a new account.
+func (u *User) Add(name, email string, db *sql.DB) error {
+	addUser, err := db.Prepare("INSERT INTO user(name, email) VALUES(?,?)")
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = addUser.Exec(name, username, email)
+	_, err = addUser.Exec(name, email)
 
 	if err != nil {
 		log.Fatal(err)
@@ -29,15 +28,15 @@ func (u *User) Add(name, username, email string, db *sql.DB) error {
 	return nil
 }
 
-func (u *User) Get(username string, db *sql.DB) (error, User) {
+func (u *User) Get(email string, db *sql.DB) (error, User) {
 	var user User
 
-	getUser, err := db.Prepare("SELECT id, name, username, email FROM user WHERE username = ?")
+	getUser, err := db.Prepare("SELECT id, name, email FROM user WHERE email = ?")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = getUser.QueryRow(username).Scan(&user.Id, &user.Name, &user.Username, &user.Email)
+	err = getUser.QueryRow(email).Scan(&user.ID, &user.Name, &user.Email)
 
 	if err != nil {
 		return errors.New("no user found"), User{}

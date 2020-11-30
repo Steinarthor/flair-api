@@ -4,14 +4,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gorilla/mux"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type App struct {
@@ -27,7 +28,7 @@ type Response struct {
 }
 
 type Claims struct {
-	Username string
+	Email string
 	jwt.StandardClaims
 }
 
@@ -68,7 +69,7 @@ func (a *App) AddUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 	}
 
-	err = addUserRequest.Add(addUserRequest.Name, addUserRequest.Username, addUserRequest.Email, a.Db)
+	err = addUserRequest.Add(addUserRequest.Name, addUserRequest.Email, a.Db)
 
 	if err != nil {
 		enc.Encode(Response{
@@ -93,13 +94,13 @@ func (a *App) GetUser(w http.ResponseWriter, r *http.Request) {
 	var getUserRequest User
 
 	enc := json.NewEncoder(w)
-	err, username := ExtractUserName(token)
+	err, email := ExtractEmail(token)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 	}
 
-	err, user := getUserRequest.Get(fmt.Sprint(username) , a.Db)
+	err, user := getUserRequest.Get(fmt.Sprint(email) , a.Db)
 
 	if err != nil {
 		enc.Encode(Response{
@@ -158,6 +159,6 @@ func jwtMiddleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/adduser", jwtMiddleware(a.AddUser)).Methods("POST")
+	a.Router.HandleFunc("/adduser", a.AddUser).Methods("POST")
 	a.Router.HandleFunc("/getuser", jwtMiddleware(a.GetUser)).Methods("GET")
 }
